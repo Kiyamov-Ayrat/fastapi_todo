@@ -1,14 +1,19 @@
 from datetime import datetime
+from enum import Enum
 
 from fastapi.params import Depends, Query
 from pydantic import BaseModel
 from sqlmodel import Field, SQLModel
 from typing import Optional, Annotated
 
+class Status(str, Enum):
+    todo = "todo"
+    in_progress = "in_progress"
+    completed = "completed"
 
 class TaskBase(SQLModel):
     description: str = Field(max_length=300)
-    status: int
+    status: Status = Field(default=Status.todo)
 
 class Task(TaskBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -19,11 +24,13 @@ class TaskCreate(TaskBase):
     pass
 
 class TaskUpdate(SQLModel):
-    description: Optional[str] = Field(max_length=300)
-    status: Optional[int] = None
+    description: Optional[str] = None
+    status: Optional[Status] = None
 
-class TaskResponse(TaskBase):
+class TaskResponse(SQLModel):
     id: int
+    description: str
+    status: Status
     creation_date: datetime
     updated_at: datetime
 
