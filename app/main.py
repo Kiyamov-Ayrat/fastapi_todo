@@ -1,12 +1,10 @@
-from typing import List
-
 from fastapi import FastAPI
 import uvicorn
 
 from app.database.task import create_db_tables, SessionDep
 from contextlib import asynccontextmanager
 from app.crud import crud_task
-from app.models.task import TaskResponse, TaskCreate, TaskUpdate
+from app.models.task import TaskResponse, TaskCreate, TaskUpdate, PaginationDep
 
 
 @asynccontextmanager
@@ -20,8 +18,8 @@ def create_task(task: TaskCreate, session: SessionDep):
     return crud_task.create_tasks(task=task, session=session)
 
 @app.get("/tasks", response_model=list[TaskResponse])
-def get_tasks(session: SessionDep):
-    return crud_task.get_all_tasks(session=session)
+def get_tasks(session: SessionDep, pagination: PaginationDep):
+    return crud_task.get_all_tasks(session=session, pagination=pagination)
 
 @app.get("/tasks/{task_id}", response_model=TaskResponse)
 def get_task(task_id: int, session: SessionDep):

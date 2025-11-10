@@ -1,23 +1,21 @@
 from datetime import datetime
 
 from fastapi import HTTPException
+from sqlmodel import select
 
 from app.database.task import SessionDep
-from app.models.task import Task, TaskCreate, TaskUpdate
+from app.models.task import Task, TaskCreate, TaskUpdate, Pagination
 
 
 def create_tasks(task: TaskCreate, session: SessionDep):
-    db_task = Task(
-        description=task.description,
-        status=task.status,
-    )
+    db_task = Task.model_validate(task)
     session.add(db_task)
     session.commit()
     session.refresh(db_task)
     return db_task
 
-def get_all_tasks(session: SessionDep):
-    task_data = session.query(Task).all()
+def get_all_tasks(session: SessionDep, pagination: Pagination):
+    task_data = session.exec(select(Task).offset(pagination.offset).limit(pagination.limit)).all()
     return task_data
 
 def get_by_id(task_id: int, session: SessionDep):
@@ -32,11 +30,8 @@ def update_task(task: TaskUpdate,
     db_task = session.get(Task, task_id)
     if not db_task:
         raise HTTPException(status_code=404, detail="Task not found")
-    updated_task = db_task.model_dump(exclude_unset=True)
-    for field, value in updated_task.items():
-        setattr(db_task, field, value)
-    db_task.updated_at = datetime.now()
-
+    updated_task = task.model_dump(exclude_unset=True)
+    db_task.sqlmodel_update(updated_task)
     session.add(db_task)
     session.commit()
     session.refresh(db_task)
