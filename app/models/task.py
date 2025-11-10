@@ -40,7 +40,7 @@ class Pagination(BaseModel):
     limit: int
 
 def pagination_params(
-        offset: int = Query(2, ge=2, description="min list of task"),
+        offset: int = Query(1, ge=1, description="min list of task"),
         limit: int = Query(10, ge=10, description="max list of task"),
 ) -> Pagination:
     return Pagination(offset=offset, limit=limit)

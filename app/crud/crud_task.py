@@ -32,6 +32,7 @@ def update_task(task: TaskUpdate,
         raise HTTPException(status_code=404, detail="Task not found")
     updated_task = task.model_dump(exclude_unset=True)
     db_task.sqlmodel_update(updated_task)
+    db_task.updated_at = datetime.now()
     session.add(db_task)
     session.commit()
     session.refresh(db_task)
