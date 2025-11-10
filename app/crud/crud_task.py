@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException
 from sqlmodel import select
-
+from starlette import status
 from app.database.task import SessionDep
 from app.models.task import Task, TaskCreate, TaskUpdate, Pagination
 
@@ -44,4 +44,4 @@ def delete_task(task_id: int, session: SessionDep):
         raise HTTPException(status_code=404, detail="Task not found")
     session.delete(task)
     session.commit()
-    return {"Ok": True}
+    return status.HTTP_202_ACCEPTED

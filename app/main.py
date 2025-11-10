@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
+from starlette import status
 
 from app.database.task import create_db_tables, SessionDep
 from contextlib import asynccontextmanager
@@ -13,7 +14,7 @@ async def lifespan(app: FastAPI):
     yield
 app = FastAPI(lifespan=lifespan)
 
-@app.post("/tasks", response_model=TaskResponse)
+@app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 def create_task(task: TaskCreate, session: SessionDep):
     return crud_task.create_tasks(task=task, session=session)
 
