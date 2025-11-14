@@ -1,11 +1,13 @@
-from fastapi import FastAPI
+from typing import Optional
+
+from fastapi import FastAPI, Query
 import uvicorn
 from starlette import status
 
 from app.database.task import create_db_tables, SessionDep
 from contextlib import asynccontextmanager
 from app.crud import crud_task
-from app.models.task import TaskResponse, TaskCreate, TaskUpdate, PaginationDep
+from app.models.task import TaskResponse, TaskCreate, TaskUpdate, PaginationDep, Status
 from app.filtr import filtr
 
 
@@ -15,17 +17,12 @@ async def lifespan(app: FastAPI):
     yield
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/tasks/todo", response_model=list[TaskResponse])
-def get_todo(session: SessionDep):
-    return filtr.get_todo(session=session)
+@app.get("/tasks/", response_model=list[TaskResponse])
+def get_tasks_status(session: SessionDep,
+                     status: Optional[Status] = Query(None)
+                     ):
+    return filtr.get_task_status(session=session, status=status)
 
-@app.get("/tasks/completed", response_model=list[TaskResponse])
-def get_completed(session: SessionDep):
-    return filtr.get_complete(session=session)
-
-@app.get("/tasks/in_progress", response_model=list[TaskResponse])
-def get_in_progress(session: SessionDep):
-    return filtr.get_in_progress(session=session)
 
 @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 def create_task(task: TaskCreate, session: SessionDep):

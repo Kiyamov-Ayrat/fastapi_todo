@@ -13,7 +13,7 @@ class Status(str, Enum):
 
 class TaskBase(SQLModel):
     description: str = Field(max_length=300)
-    status: Status = Field(default=Status.todo)
+    status: Status = Field(default=Status.todo, index=True)
 
 class Task(TaskBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
