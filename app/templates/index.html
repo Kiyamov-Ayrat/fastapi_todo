@@ -4,11 +4,66 @@
     <meta charset="UTF-8">
     <title>Task Manager</title>
     <style>
-        body { font-family: Arial; padding: 20px; }
-        input, select { padding: 6px; margin: 4px; }
-        button { padding: 6px 12px; margin: 4px; cursor: pointer; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f3f4f6;
+        }
+
+        h2, h3 {
+            color: #333;
+        }
+
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: white;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #3b82f6;
+            color: white;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #ccc;
+        }
+
         .task {
-            border: 1px solid #ccc; padding: 10px; margin: 5px 0;
+            border: 1px solid #ddd;
+            background: white;
+            padding: 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Цвета статусов */
+        .status-todo {
+            border-left: 6px solid #f59e0b; /* yellow */
+        }
+
+        .status-in_progress {
+            border-left: 6px solid #3b82f6; /* blue */
+        }
+
+        .status-completed {
+            border-left: 6px solid #10b981; /* green */
         }
     </style>
 </head>
@@ -145,7 +200,7 @@ function renderTasks(tasks) {
 
     tasks.forEach(t => {
         const div = document.createElement("div");
-        div.className = "task";
+        div.className = "task status-" + t.status;
         div.innerHTML = `
             <b>ID:</b> ${t.id}<br>
             <b>Description:</b> ${t.description}<br>

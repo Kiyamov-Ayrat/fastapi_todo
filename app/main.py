@@ -1,9 +1,8 @@
 from typing import Optional
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, status
 import uvicorn
-from starlette import status
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.task import create_db_tables, SessionDep
 from contextlib import asynccontextmanager
