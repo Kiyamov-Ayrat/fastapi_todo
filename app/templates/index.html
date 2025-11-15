@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Manager</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        input, select { padding: 6px; margin: 4px; }
+        button { padding: 6px 12px; margin: 4px; cursor: pointer; }
+        .task {
+            border: 1px solid #ccc; padding: 10px; margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Task Manager UI</h2>
+
+<h3>Load tasks</h3>
+<label>Status:</label>
+<select id="status-filter">
+    <option value="">Any</option>
+    <option value="todo">todo</option>
+    <option value="in_progress">in_progress</option>
+    <option value="completed">completed</option>
+</select>
+
+<label>Offset:</label>
+<input id="offset" type="number" value="1" />
+
+<label>Limit:</label>
+<input id="limit" type="number" value="10" />
+
+<button onclick="loadTasks()">Load</button>
+
+<hr>
+
+<h3>Create Task</h3>
+<input id="create-description" placeholder="Description" />
+<select id="create-status">
+    <option value="todo">todo</option>
+    <option value="in_progress">in_progress</option>
+    <option value="completed">completed</option>
+</select>
+<button onclick="createTask()">Create</button>
+
+<hr>
+
+<h3>Update Task</h3>
+<input id="update-id" type="number" placeholder="Task ID" />
+<input id="update-description" placeholder="New description" />
+<select id="update-status">
+    <option value="">(do not change)</option>
+    <option value="todo">todo</option>
+    <option value="in_progress">in_progress</option>
+    <option value="completed">completed</option>
+</select>
+<button onclick="updateTask()">Update</button>
+
+<hr>
+
+<h3>Delete Task</h3>
+<input id="delete-id" type="number" placeholder="Task ID" />
+<button onclick="deleteTask()">Delete</button>
+
+<hr>
+
+<h3>Tasks</h3>
+<div id="task-list"></div>
+
+<script>
+const API = "http://localhost:8000";
+
+// Load tasks
+async function loadTasks() {
+    const status = document.getElementById("status-filter").value;
+    const offset = document.getElementById("offset").value;
+    const limit = document.getElementById("limit").value;
+
+    let url;
+
+    // Если указан статус — используем /tasks/?status=
+    if (status) {
+        url = `${API}/tasks/?status=${status}`;
+    } else {
+        // Иначе используем пагинацию
+        url = `${API}/tasks?offset=${offset}&limit=${limit}`;
+    }
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    renderTasks(data);
+}
+
+// Create task
+async function createTask() {
+    const description = document.getElementById("create-description").value;
+    const status = document.getElementById("create-status").value;
+
+    const res = await fetch(`${API}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description, status })
+    });
+
+    alert("Task created");
+    loadTasks();
+}
+
+// Update
+async function updateTask() {
+    const id = document.getElementById("update-id").value;
+    const description = document.getElementById("update-description").value;
+    const status = document.getElementById("update-status").value;
+
+    const body = {};
+    if (description) body.description = description;
+    if (status) body.status = status;
+
+    const res = await fetch(`${API}/tasks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    alert("Task updated");
+    loadTasks();
+}
+
+// Delete
+async function deleteTask() {
+    const id = document.getElementById("delete-id").value;
+
+    await fetch(`${API}/tasks/${id}`, { method: "DELETE" });
+
+    alert("Task deleted");
+    loadTasks();
+}
+
+// Render
+function renderTasks(tasks) {
+    const list = document.getElementById("task-list");
+    list.innerHTML = "";
+
+    tasks.forEach(t => {
+        const div = document.createElement("div");
+        div.className = "task";
+        div.innerHTML = `
+            <b>ID:</b> ${t.id}<br>
+            <b>Description:</b> ${t.description}<br>
+            <b>Status:</b> ${t.status}<br>
+            <b>Created:</b> ${t.creation_date}<br>
+            <b>Updated:</b> ${t.updated_at}
+        `;
+        list.appendChild(div);
+    });
+}
+</script>
+
+</body>
+</html>

@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import FastAPI, Query
 import uvicorn
 from starlette import status
+from starlette.middleware.cors import CORSMiddleware
 
 from app.database.task import create_db_tables, SessionDep
 from contextlib import asynccontextmanager
@@ -17,6 +18,21 @@ async def lifespan(app: FastAPI):
     yield
 app = FastAPI(lifespan=lifespan)
 
+origins = [
+    "http://localhost",
+    "http://localhost:63342",   # JetBrains browser
+    "http://127.0.0.1",
+    "http://127.0.0.1:63342",
+    "*"  # можно убрать позже
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/tasks/", response_model=list[TaskResponse])
 def get_tasks_status(session: SessionDep,
                      status: Optional[Status] = Query(None)
